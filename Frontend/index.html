@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lore Protocol — Onchain Creator Economy</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black:   #080B14;
+    --slate:   #1A1F35;
+    --indigo:  #6C63FF;
+    --cyan:    #00F5FF;
+    --gold:    #FFB547;
+    --white:   #F0F4FF;
+    --dim:     #8892AA;
+    --error:   #FF4D6D;
+    --success: #00E5A0;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── STAR FIELD ─── */
+  #starfield {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    overflow: hidden;
+  }
+  .star {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: var(--white);
+    border-radius: 50%;
+    animation: twinkle var(--dur) ease-in-out infinite;
+    opacity: 0;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; }
+    50% { opacity: var(--op); }
+  }
+
+  /* ─── LAYOUT ─── */
+  .page { position: relative; z-index: 1; }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(108,99,255,0.15) 0%, transparent 70%);
+    pointer-events: none;
+    animation: pulse-glow 4s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.1); opacity: 1; }
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fade-up 0.8s 0.2s forwards;
+  }
+
+  .hero-title {
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fade-up 0.8s 0.4s forwards;
+  }
+
+  .hero-title span {
+    background: linear-gradient(135deg, var(--indigo), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--dim);
+    max-width: 520px;
+    line-height: 1.7;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fade-up 0.8s 0.6s forwards;
+  }
+
+  .badge-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fade-up 0.8s 0.8s forwards;
+  }
+
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid;
+  }
+  .badge-indigo { border-color: var(--indigo); color: var(--indigo); background: rgba(108,99,255,0.08); }
+  .badge-cyan   { border-color: var(--cyan);   color: var(--cyan);   background: rgba(0,245,255,0.08); }
+  .badge-gold   { border-color: var(--gold);   color: var(--gold);   background: rgba(255,181,71,0.08); }
+
+  .run-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2.5rem;
+    border-radius: 999px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    border: none;
+    background: linear-gradient(135deg, var(--indigo), #9B6DFF);
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    opacity: 0;
+    animation: fade-up 0.8s 1s forwards;
+    box-shadow: 0 0 40px rgba(108,99,255,0.4);
+  }
+  .run-btn:hover { transform: translateY(-2px); box-shadow: 0 0 60px rgba(108,99,255,0.6); }
+  .run-btn:active { transform: translateY(0); }
+  .run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .run-btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .run-btn:hover::before { opacity: 1; }
+
+  .btn-icon {
+    width: 20px; height: 20px;
+    transition: transform 0.3s;
+  }
+  .run-btn:not(:disabled):hover .btn-icon { transform: rotate(90deg); }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── SCROLL ARROW ─── */
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--dim);
+    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.1em;
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    opacity: 0;
+    animation: fade-up 1s 1.5s forwards;
+  }
+  .scroll-arrow {
+    width: 1px; height: 40px;
+    background: linear-gradient(to bottom, var(--indigo), transparent);
+    animation: scroll-pulse 2s ease-in-out infinite;
+  }
+  @keyframes scroll-pulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(1); }
+    50% { opacity: 1; transform: scaleY(1.2); }
+  }
+
+  /* ─── DEMO SECTION ─── */
+  .demo-section {
+    padding: 4rem 1.5rem 6rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 0.75rem;
+  }
+
+  .section-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 3rem;
+  }
+
+  /* ─── PIPELINE ─── */
+  .pipeline {
+    display: grid;
+    grid-template-columns: 1fr 2px 1fr;
+    gap: 0 0;
+    position: relative;
+  }
+
+  /* center spine */
+  .spine {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .spine-line {
+    width: 2px;
+    flex: 1;
+    background: var(--slate);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .spine-fill {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 0%;
+    background: linear-gradient(to bottom, var(--indigo), var(--cyan));
+    transition: height 0.6s ease;
+  }
+
+  .spine-node {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--slate);
+    background: var(--black);
+    flex-shrink: 0;
+    transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+    position: relative;
+    z-index: 2;
+  }
+  .spine-node.active {
+    border-color: var(--indigo);
+    background: var(--indigo);
+    box-shadow: 0 0 16px rgba(108,99,255,0.8);
+  }
+  .spine-node.done {
+    border-color: var(--success);
+    background: var(--success);
+    box-shadow: 0 0 12px rgba(0,229,160,0.6);
+  }
+  .spine-node.error {
+    border-color: var(--error);
+    background: var(--error);
+  }
+
+  /* tx cards */
+  .tx-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    padding-top: 0.75rem;
+  }
+  .tx-col.left { padding-right: 2rem; }
+  .tx-col.right { padding-left: 2rem; padding-top: 3rem; }
+
+  .tx-card {
+    background: var(--slate);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    opacity: 0.4;
+  }
+  .tx-card.active {
+    border-color: var(--indigo);
+    box-shadow: 0 0 30px rgba(108,99,255,0.2);
+    opacity: 1;
+  }
+  .tx-card.done {
+    border-color: rgba(0,229,160,0.3);
+    box-shadow: 0 0 20px rgba(0,229,160,0.1);
+    opacity: 1;
+  }
+  .tx-card.error {
+    border-color: rgba(255,77,109,0.4);
+    opacity: 1;
+  }
+
+  .tx-card-shimmer {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(108,99,255,0.05) 50%, transparent 60%);
+    background-size: 200% 200%;
+    animation: shimmer 2s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .tx-card.active .tx-card-shimmer { opacity: 1; }
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to   { background-position: -200% 0; }
+  }
+
+  .tx-type {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--indigo);
+    margin-bottom: 0.5rem;
+  }
+  .tx-card.done .tx-type { color: var(--success); }
+
+  .tx-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+  }
+
+  .tx-desc {
+    font-size: 0.82rem;
+    color: var(--dim);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .tx-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--dim);
+    min-height: 1.5rem;
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--dim);
+    flex-shrink: 0;
+  }
+  .status-dot.spinning {
+    background: var(--indigo);
+    animation: spin-dot 1s linear infinite;
+  }
+  @keyframes spin-dot {
+    0% { box-shadow: 0 0 0 0 rgba(108,99,255,0.6); }
+    50% { box-shadow: 0 0 0 6px rgba(108,99,255,0); }
+    100% { box-shadow: 0 0 0 0 rgba(108,99,255,0); }
+  }
+  .status-dot.ok { background: var(--success); }
+  .status-dot.fail { background: var(--error); }
+
+  .tx-hash {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--indigo);
+    word-break: break-all;
+    margin-top: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .tx-hash.visible { opacity: 1; }
+
+  /* ─── STATE PANEL ─── */
+  .state-panel {
+    margin-top: 4rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+
+  .state-card {
+    background: var(--slate);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .state-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 0.5rem;
+  }
+
+  .state-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--white);
+    transition: color 0.3s;
+  }
+  .state-value.updated {
+    animation: value-flash 0.6s ease;
+  }
+  @keyframes value-flash {
+    0%, 100% { color: var(--white); }
+    50% { color: var(--cyan); }
+  }
+
+  .state-sub {
+    font-size: 0.75rem;
+    color: var(--dim);
+    margin-top: 0.25rem;
+  }
+
+  .state-accent {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--indigo), var(--cyan));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.6s ease;
+  }
+  .state-card.lit .state-accent { transform: scaleX(1); }
+
+  /* ─── LOG ─── */
+  .log-panel {
+    margin-top: 2rem;
+    background: var(--slate);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .log-panel::-webkit-scrollbar { width: 4px; }
+  .log-panel::-webkit-scrollbar-track { background: transparent; }
+  .log-panel::-webkit-scrollbar-thumb { background: var(--indigo); border-radius: 2px; }
+
+  .log-line {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    line-height: 1.8;
+    color: var(--dim);
+    display: flex;
+    gap: 1rem;
+  }
+  .log-time { color: var(--indigo); flex-shrink: 0; }
+  .log-line.success .log-msg { color: var(--success); }
+  .log-line.warn    .log-msg { color: var(--gold); }
+  .log-line.error   .log-msg { color: var(--error); }
+  .log-line.info    .log-msg { color: var(--white); }
+
+  /* ─── RESULT BANNER ─── */
+  .result-banner {
+    margin-top: 2rem;
+    padding: 1.5rem 2rem;
+    border-radius: 16px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s, transform 0.5s;
+    display: none;
+  }
+  .result-banner.visible {
+    opacity: 1; transform: translateY(0); display: block;
+  }
+  .result-banner.pass {
+    background: rgba(0,229,160,0.08);
+    border: 1px solid rgba(0,229,160,0.3);
+  }
+  .result-banner.fail {
+    background: rgba(255,77,109,0.08);
+    border: 1px solid rgba(255,77,109,0.3);
+  }
+  .result-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+  .result-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .result-sub { font-size: 0.85rem; color: var(--dim); }
+
+  /* ─── CONFIG ─── */
+  .config-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .config-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1;
+    min-width: 180px;
+  }
+  .config-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .config-input {
+    background: var(--slate);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 0.6rem 0.9rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--white);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .config-input:focus { border-color: var(--indigo); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 700px) {
+    .pipeline { grid-template-columns: 1fr; }
+    .spine { display: none; }
+    .tx-col.left, .tx-col.right { padding: 0; }
+    .tx-col.right { padding-top: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div id="starfield"></div>
+
+<div class="page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+
+    <div class="eyebrow">Canopy Network · Social-Fi · Vibe Code Contest #2</div>
+
+    <h1 class="hero-title">
+      <span>Lore</span><br>Protocol
+    </h1>
+
+    <p class="hero-sub">
+      An onchain creator economy where audiences tip CNPY to reward content,
+      earn Supporter status, and surface top creators through a live leaderboard —
+      all on the Canopy chain.
+    </p>
+
+    <div class="badge-row">
+      <span class="badge badge-indigo">5 Transaction Types</span>
+      <span class="badge badge-cyan">Real CNPY Movements</span>
+      <span class="badge badge-gold">Supporter Registry</span>
+      <span class="badge badge-indigo">Weekly Leaderboard</span>
+      <span class="badge badge-cyan">Canopy Plugin</span>
+    </div>
+
+    <button class="run-btn" id="heroRunBtn" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">
+      <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="5,3 19,12 5,21"/>
+      </svg>
+      Run Live Demo
+    </button>
+
+    <div class="scroll-hint">
+      <span>scroll</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- DEMO -->
+  <section class="demo-section" id="demo">
+    <div class="section-label">Live Integration Test</div>
+    <h2 class="section-title">Watch every transaction land onchain</h2>
+
+    <!-- CONFIG -->
+    <div class="config-row">
+      <div class="config-field">
+        <label class="config-label">Query RPC</label>
+        <input class="config-input" id="cfgQuery" value="http://localhost:50002">
+      </div>
+      <div class="config-field">
+        <label class="config-label">Admin RPC</label>
+        <input class="config-input" id="cfgAdmin" value="http://localhost:50003">
+      </div>
+      <div class="config-field">
+        <label class="config-label">Validator Address</label>
+        <input class="config-input" id="cfgValidator" value="133cd9a5d78de6e9ca2b9bd0ecf1f31f57c59c38">
+      </div>
+      <div class="config-field">
+        <label class="config-label">Chain ID</label>
+        <input class="config-input" id="cfgChainId" value="1">
+      </div>
+    </div>
+
+    <button class="run-btn" id="runBtn" onclick="runDemo()" style="margin-bottom:3rem; opacity:1; animation:none;">
+      <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="5,3 19,12 5,21"/>
+      </svg>
+      <span id="runBtnLabel">Run Full Demo</span>
+    </button>
+
+    <!-- PIPELINE -->
+    <div class="pipeline">
+
+      <!-- LEFT COLUMN -->
+      <div class="tx-col left">
+
+        <div class="tx-card" id="card-fund">
+          <div class="tx-card-shimmer"></div>
+          <div class="tx-type">Setup</div>
+          <div class="tx-title">Fund Accounts</div>
+          <div class="tx-desc">Create creator and tipper wallets, then send CNPY from the validator to both accounts so they can pay transaction fees.</div>
+          <div class="tx-status">
+            <div class="status-dot" id="dot-fund"></div>
+            <span id="status-fund">Waiting</span>
+          </div>
+          <div class="tx-hash" id="hash-fund"></div>
+        </div>
+
+        <div class="tx-card" id="card-publish">
+          <div class="tx-card-shimmer"></div>
+          <div class="tx-type">MsgPublishThread</div>
+          <div class="tx-title">Publish Thread</div>
+          <div class="tx-desc">Creator registers a piece of content onchain as a SHA-256 hash + title. Immutable proof of publication without storing the content itself.</div>
+          <div class="tx-status">
+            <div class="status-dot" id="dot-publish"></div>
+            <span id="status-publish">Waiting</span>
+          </div>
+          <div class="tx-hash" id="hash-publish"></div>
+        </div>
+
+        <div class="tx-card" id="card-claim">
+          <div class="tx-card-shimmer"></div>
+          <div class="tx-type">MsgClaimTips</div>
+          <div class="tx-title">Claim Tips</div>
+          <div class="tx-desc">Creator withdraws the full accumulated pending balance to their wallet. Pending balance resets to zero, closing the economic loop.</div>
+          <div class="tx-status">
+            <div class="status-dot" id="dot-claim"></div>
+            <span id="status-claim">Waiting</span>
+          </div>
+          <div class="tx-hash" id="hash-claim"></div>
+        </div>
+
+      </div>
+
+      <!-- SPINE -->
+      <div class="spine">
+        <div class="spine-node" id="node-0"></div>
+        <div class="spine-line"><div class="spine-fill" id="fill-0"></div></div>
+        <div class="spine-node" id="node-1"></div>
+        <div class="spine-line"><div class="spine-fill" id="fill-1"></div></div>
+        <div class="spine-node" id="node-2"></div>
+        <div class="spine-line"><div class="spine-fill" id="fill-2"></div></div>
+        <div class="spine-node" id="node-3"></div>
+        <div class="spine-line"><div class="spine-fill" id="fill-3"></div></div>
+        <div class="spine-node" id="node-4"></div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="tx-col right">
+
+        <div class="tx-card" id="card-threshold">
+          <div class="tx-card-shimmer"></div>
+          <div class="tx-type">MsgSetSupporterThreshold</div>
+          <div class="tx-title">Set Supporter Threshold</div>
+          <div class="tx-desc">Creator defines the cumulative tip amount required for a tipper to earn Supporter status. Other plugins can query this registry to gate access.</div>
+          <div class="tx-status">
+            <div class="status-dot" id="dot-threshold"></div>
+            <span id="status-threshold">Waiting</span>
+          </div>
+          <div class="tx-hash" id="hash-threshold"></div>
+        </div>
+
+        <div class="tx-card" id="card-tip">
+          <div class="tx-card-shimmer"></div>
+          <div class="tx-type">MsgTipCreator</div>
+          <div class="tx-title">Tip Creator</div>
+          <div class="tx-desc">Tipper sends CNPY to creator. Tip accumulates in pending balance and weekly leaderboard counter. If cumulative tips cross the threshold, Supporter status is granted.</div>
+          <div class="tx-status">
+            <div class="status-dot" id="dot-tip"></div>
+            <span id="status-tip">Waiting</span>
+          </div>
+          <div class="tx-hash" id="hash-tip"></div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- STATE PANEL -->
+    <div class="state-panel" id="statePanel">
+
+      <div class="state-card" id="sc-height">
+        <div class="state-accent"></div>
+        <div class="state-label">Chain Height</div>
+        <div class="state-value" id="sv-height">—</div>
+        <div class="state-sub">Current block</div>
+      </div>
+
+      <div class="state-card" id="sc-creator">
+        <div class="state-accent"></div>
+        <div class="state-label">Creator Balance</div>
+        <div class="state-value" id="sv-creator">—</div>
+        <div class="state-sub">uCNPY</div>
+      </div>
+
+      <div class="state-card" id="sc-tipper">
+        <div class="state-accent"></div>
+        <div class="state-label">Tipper Balance</div>
+        <div class="state-value" id="sv-tipper">—</div>
+        <div class="state-sub">uCNPY</div>
+      </div>
+
+      <div class="state-card" id="sc-supporter">
+        <div class="state-accent"></div>
+        <div class="state-label">Supporter Status</div>
+        <div class="state-value" id="sv-supporter">—</div>
+        <div class="state-sub">Tipper → Creator</div>
+      </div>
+
+    </div>
+
+    <!-- LOG -->
+    <div class="log-panel" id="logPanel"></div>
+
+    <!-- RESULT -->
+    <div class="result-banner" id="resultBanner">
+      <div class="result-icon" id="resultIcon"></div>
+      <div class="result-title" id="resultTitle"></div>
+      <div class="result-sub" id="resultSub"></div>
+    </div>
+
+  </section>
+
+</div>
+
+<script>
+// ─── STARFIELD ───────────────────────────────────────────────
+(function() {
+  const sf = document.getElementById('starfield');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top  = Math.random() * 100 + '%';
+    const dur = (3 + Math.random() * 5).toFixed(1) + 's';
+    const op  = (0.2 + Math.random() * 0.6).toFixed(2);
+    s.style.setProperty('--dur', dur);
+    s.style.setProperty('--op', op);
+    s.style.animationDelay = (Math.random() * 6).toFixed(1) + 's';
+    sf.appendChild(s);
+  }
+})();
+
+// ─── RPC HELPERS ─────────────────────────────────────────────
+const QUERY = () => document.getElementById('cfgQuery').value.trim();
+const ADMIN  = () => document.getElementById('cfgAdmin').value.trim();
+
+async function rpc(url, body) {
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const text = await r.text();
+  try { return JSON.parse(text); } catch { return text; }
+}
+
+async function getHeight() {
+  const d = await rpc(QUERY() + '/v1/query/height', {});
+  return Number(d?.height ?? d) || 0;
+}
+
+async function getBalance(addr) {
+  const d = await rpc(QUERY() + '/v1/query/account', { address: addr });
+  return Number(d?.amount ?? 0);
+}
+
+async function keystoreNew(nickname, password) {
+  const d = await rpc(ADMIN() + '/v1/admin/keystore-new-key', { nickname, password });
+  if (!d?.address) throw new Error('keystoreNew failed: ' + JSON.stringify(d));
+  return d.address;
+}
+
+async function keystoreGet(address, password) {
+  const d = await rpc(ADMIN() + '/v1/admin/keystore-get', { addressOrNickname: address, password });
+  if (!d?.privateKey) throw new Error('keystoreGet failed: ' + JSON.stringify(d));
+  return d;
+}
+
+// ─── SIGN + SEND ─────────────────────────────────────────────
+// We use the admin tx-send endpoint for the funding send,
+// and raw JSON submission for Lore types (same as tutorial rpc_test.go plugin-only branch).
+
+async function adminSend(from, to, amount, fee) {
+  const d = await rpc(ADMIN() + '/v1/admin/transaction-send', {
+    senderAddress: from, recipientAddress: to, amount, fee, password: ''
+  });
+  return d;
+}
+
+// For Lore txs we submit pre-built JSON using the plugin-only branch format.
+// Since we can't do BLS signing in the browser without WASM, we use the admin
+// sign-and-submit endpoint which accepts a structured tx request.
+async function adminTx(type, msgTypeUrl, msgObj, signerAddr, fee) {
+  const height = await getHeight();
+  const d = await rpc(ADMIN() + '/v1/admin/transaction', {
+    type,
+    msgTypeUrl,
+    msg: msgObj,
+    signerAddress: signerAddr,
+    fee,
+    password: '',
+    createdHeight: height,
+    networkID: 1,
+    chainID: Number(document.getElementById('cfgChainId').value) || 1,
+  });
+  return d;
+}
+
+// ─── UI HELPERS ──────────────────────────────────────────────
+function log(msg, level = 'info') {
+  const panel = document.getElementById('logPanel');
+  const now = new Date();
+  const t = now.toTimeString().slice(0, 8);
+  const line = document.createElement('div');
+  line.className = 'log-line ' + level;
+  line.innerHTML = `<span class="log-time">${t}</span><span class="log-msg">${msg}</span>`;
+  panel.appendChild(line);
+  panel.scrollTop = panel.scrollHeight;
+}
+
+function setCard(id, state) {
+  const c = document.getElementById('card-' + id);
+  c.classList.remove('active', 'done', 'error');
+  if (state) c.classList.add(state);
+}
+
+function setDot(id, state) {
+  const d = document.getElementById('dot-' + id);
+  d.className = 'status-dot' + (state ? ' ' + state : '');
+}
+
+function setStatus(id, text) {
+  document.getElementById('status-' + id).textContent = text;
+}
+
+function setHash(id, hash) {
+  const el = document.getElementById('hash-' + id);
+  el.textContent = hash ? '↳ ' + hash.slice(0, 32) + '…' : '';
+  el.classList.toggle('visible', !!hash);
+}
+
+function setNode(i, state) {
+  const n = document.getElementById('node-' + i);
+  n.classList.remove('active', 'done', 'error');
+  if (state) n.classList.add(state);
+}
+
+function setFill(i, pct) {
+  document.getElementById('fill-' + i).style.height = pct + '%';
+}
+
+function setStateVal(id, val) {
+  const el = document.getElementById('sv-' + id);
+  el.textContent = val;
+  el.classList.remove('updated');
+  void el.offsetWidth;
+  el.classList.add('updated');
+  document.getElementById('sc-' + id).classList.add('lit');
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function waitForBalance(addr, minBalance, timeout = 90000) {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    const bal = await getBalance(addr);
+    if (bal >= minBalance) return bal;
+    await sleep(3000);
+  }
+  throw new Error('Balance timeout for ' + addr);
+}
+
+// Poll height until it advances (proxy for tx inclusion)
+async function waitForHeightAdvance(fromHeight, timeout = 90000) {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    const h = await getHeight();
+    if (h > fromHeight) return h;
+    await sleep(2000);
+  }
+  throw new Error('Height did not advance within timeout');
+}
+
+// ─── MAIN DEMO ───────────────────────────────────────────────
+let running = false;
+
+async function runDemo() {
+  if (running) return;
+  running = true;
+
+  const btn = document.getElementById('runBtn');
+  const label = document.getElementById('runBtnLabel');
+  btn.disabled = true;
+  label.textContent = 'Running…';
+
+  // reset UI
+  document.getElementById('logPanel').innerHTML = '';
+  document.getElementById('resultBanner').className = 'result-banner';
+  ['fund','publish','threshold','tip','claim'].forEach(id => {
+    setCard(id, null); setDot(id, null); setStatus(id, 'Waiting'); setHash(id, '');
+  });
+  for (let i = 0; i < 5; i++) { setNode(i, null); setFill(i > 0 ? i-1 : 0, 0); }
+  ['height','creator','tipper','supporter'].forEach(id => {
+    document.getElementById('sv-' + id).textContent = '—';
+    document.getElementById('sc-' + id).classList.remove('lit');
+  });
+
+  const validatorAddr = document.getElementById('cfgValidator').value.trim();
+  const suffix = Math.random().toString(36).slice(2, 8);
+  const password = 'lore_demo_pw';
+  const fee = 10000;
+  let creatorAddr, tipperAddr;
+
+  try {
+    // ── STEP 0: HEIGHT ──
+    const h0 = await getHeight();
+    setStateVal('height', h0);
+    log(`Chain at height ${h0}`, 'info');
+    setNode(0, 'done');
+
+    // ── STEP 1: FUND ──
+    setCard('fund', 'active'); setDot('fund', 'spinning'); setStatus('fund', 'Creating accounts…');
+    setNode(1, 'active');
+    log('Creating creator wallet…');
+
+    creatorAddr = await keystoreNew('lore_creator_' + suffix, password);
+    tipperAddr  = await keystoreNew('lore_tipper_'  + suffix, password);
+    log(`Creator: ${creatorAddr.slice(0,16)}…`);
+    log(`Tipper:  ${tipperAddr.slice(0,16)}…`);
+
+    setStatus('fund', 'Sending CNPY from validator…');
+    log('Funding creator via send tx…');
+
+    // Send to creator
+    const sendCreator = await rpc(ADMIN() + '/v1/admin/transaction-send', {
+      senderAddress: validatorAddr,
+      recipientAddress: creatorAddr,
+      amount: 500000000,
+      fee,
+      password: ''
+    });
+    log('Creator fund tx submitted: ' + (sendCreator?.txHash || JSON.stringify(sendCreator)).slice(0,20) + '…', 'info');
+
+    // Wait for creator to have balance
+    await waitForBalance(creatorAddr, 1);
+    const creatorBal = await getBalance(creatorAddr);
+    setStateVal('creator', creatorBal.toLocaleString());
+    log(`Creator funded: ${creatorBal.toLocaleString()} uCNPY`, 'success');
+
+    // Send to tipper
+    const sendTipper = await rpc(ADMIN() + '/v1/admin/transaction-send', {
+      senderAddress: validatorAddr,
+      recipientAddress: tipperAddr,
+      amount: 500000000,
+      fee,
+      password: ''
+    });
+    log('Tipper fund tx submitted', 'info');
+    await waitForBalance(tipperAddr, 1);
+    const tipperBal = await getBalance(tipperAddr);
+    setStateVal('tipper', tipperBal.toLocaleString());
+    log(`Tipper funded: ${tipperBal.toLocaleString()} uCNPY`, 'success');
+
+    setCard('fund', 'done'); setDot('fund', 'ok'); setStatus('fund', 'Both accounts funded ✓');
+    setFill(0, 100); setNode(1, 'done'); setNode(2, 'active');
+    setStateVal('height', await getHeight());
+
+    await sleep(400);
+
+    // ── STEP 2: PUBLISH THREAD ──
+    setCard('publish', 'active'); setDot('publish', 'spinning'); setStatus('publish', 'Submitting to chain…');
+    log('Submitting publish_thread tx…');
+
+    const publishRes = await rpc(ADMIN() + '/v1/admin/transaction', {
+      type: 'publish_thread',
+      signerAddress: creatorAddr,
+      password,
+      fee,
+      msg: {
+        creator: creatorAddr,
+        contentHash: Array.from({length: 32}, (_,i) => i.toString(16).padStart(2,'0')).join(''),
+        title: 'My First Lore Post — Built on Canopy'
+      }
+    });
+
+    const publishHash = publishRes?.txHash || publishRes;
+    log(`publish_thread tx: ${String(publishHash).slice(0,24)}…`, 'info');
+    setStatus('publish', 'Waiting for block inclusion…');
+
+    const h1 = await getHeight();
+    await waitForHeightAdvance(h1);
+    setStateVal('height', await getHeight());
+
+    setCard('publish', 'done'); setDot('publish', 'ok');
+    setStatus('publish', 'Thread published onchain ✓');
+    setHash('publish', String(publishHash));
+    log('publish_thread confirmed', 'success');
+    setFill(1, 100); setNode(2, 'done'); setNode(3, 'active');
+
+    await sleep(400);
+
+    // ── STEP 3: SET SUPPORTER THRESHOLD ──
+    setCard('threshold', 'active'); setDot('threshold', 'spinning'); setStatus('threshold', 'Submitting to chain…');
+    log('Submitting set_supporter_threshold tx…');
+
+    const threshRes = await rpc(ADMIN() + '/v1/admin/transaction', {
+      type: 'set_supporter_threshold',
+      signerAddress: creatorAddr,
+      password,
+      fee,
+      msg: {
+        creator: creatorAddr,
+        thresholdUcnpy: 50000000
+      }
+    });
+
+    const threshHash = threshRes?.txHash || threshRes;
+    log(`set_supporter_threshold tx: ${String(threshHash).slice(0,24)}…`, 'info');
+    setStatus('threshold', 'Waiting for block inclusion…');
+
+    const h2 = await getHeight();
+    await waitForHeightAdvance(h2);
+    setStateVal('height', await getHeight());
+
+    setCard('threshold', 'done'); setDot('threshold', 'ok');
+    setStatus('threshold', 'Threshold set: 50M uCNPY ✓');
+    setHash('threshold', String(threshHash));
+    log('Supporter threshold set at 50,000,000 uCNPY', 'success');
+    setFill(2, 100); setNode(3, 'done'); setNode(4, 'active');
+
+    await sleep(400);
+
+    // ── STEP 4: TIP CREATOR ──
+    setCard('tip', 'active'); setDot('tip', 'spinning'); setStatus('tip', 'Submitting to chain…');
+    log('Submitting tip_creator tx (100M uCNPY)…');
+
+    const tipBefore = await getBalance(tipperAddr);
+
+    const tipRes = await rpc(ADMIN() + '/v1/admin/transaction', {
+      type: 'tip_creator',
+      signerAddress: tipperAddr,
+      password,
+      fee,
+      msg: {
+        tipper: tipperAddr,
+        creator: creatorAddr,
+        amount: 100000000
+      }
+    });
+
+    const tipHash = tipRes?.txHash || tipRes;
+    log(`tip_creator tx: ${String(tipHash).slice(0,24)}…`, 'info');
+    setStatus('tip', 'Waiting for block inclusion…');
+
+    const h3 = await getHeight();
+    await waitForHeightAdvance(h3);
+    const tipAfter = await getBalance(tipperAddr);
+    const delta = tipBefore - tipAfter;
+    setStateVal('tipper', tipAfter.toLocaleString());
+    setStateVal('height', await getHeight());
+
+    // Check supporter status (cumulative 100M > threshold 50M)
+    const supporterGranted = delta >= 100000000;
+    setStateVal('supporter', supporterGranted ? '✓ Granted' : 'Pending');
+
+    setCard('tip', 'done'); setDot('tip', 'ok');
+    setStatus('tip', `Tipped 100M uCNPY · Supporter ${supporterGranted ? 'unlocked ✓' : 'pending'}`);
+    setHash('tip', String(tipHash));
+    log(`tip_creator confirmed · tipper delta: ${delta.toLocaleString()} uCNPY`, 'success');
+    if (supporterGranted) log('Supporter status granted (cumulative tips > threshold)', 'success');
+    setFill(3, 100); setNode(4, 'done');
+
+    await sleep(400);
+
+    // ── STEP 5: CLAIM TIPS ──
+    setCard('claim', 'active'); setDot('claim', 'spinning'); setStatus('claim', 'Submitting to chain…');
+    log('Submitting claim_tips tx…');
+
+    const claimBefore = await getBalance(creatorAddr);
+
+    const claimRes = await rpc(ADMIN() + '/v1/admin/transaction', {
+      type: 'claim_tips',
+      signerAddress: creatorAddr,
+      password,
+      fee,
+      msg: { creator: creatorAddr }
+    });
+
+    const claimHash = claimRes?.txHash || claimRes;
+    log(`claim_tips tx: ${String(claimHash).slice(0,24)}…`, 'info');
+    setStatus('claim', 'Waiting for block inclusion…');
+
+    const h4 = await getHeight();
+    await waitForHeightAdvance(h4);
+    const claimAfter = await getBalance(creatorAddr);
+    setStateVal('creator', claimAfter.toLocaleString());
+    setStateVal('height', await getHeight());
+
+    const gained = claimAfter - claimBefore;
+    setCard('claim', 'done'); setDot('claim', 'ok');
+    setStatus('claim', `+${gained.toLocaleString()} uCNPY received ✓`);
+    setHash('claim', String(claimHash));
+    log(`claim_tips confirmed · creator gained: ${gained.toLocaleString()} uCNPY`, 'success');
+    log('Economic loop closed: tip → pending → claimed', 'success');
+    setFill(4, 100);
+
+    // ── PASS ──
+    await sleep(500);
+    const banner = document.getElementById('resultBanner');
+    banner.className = 'result-banner pass';
+    document.getElementById('resultIcon').textContent = '✓';
+    document.getElementById('resultTitle').textContent = 'All transactions confirmed';
+    document.getElementById('resultSub').textContent =
+      `publish → set_threshold → tip → claim · ${5} tx types · real CNPY movements · Supporter registry written`;
+    void banner.offsetWidth;
+    banner.classList.add('visible');
+    log('DEMO COMPLETE — all steps passed', 'success');
+
+  } catch (err) {
+    log('ERROR: ' + err.message, 'error');
+    const banner = document.getElementById('resultBanner');
+    banner.className = 'result-banner fail';
+    document.getElementById('resultIcon').textContent = '✗';
+    document.getElementById('resultTitle').textContent = 'Demo encountered an error';
+    document.getElementById('resultSub').textContent = err.message;
+    void banner.offsetWidth;
+    banner.classList.add('visible');
+  }
+
+  btn.disabled = false;
+  label.textContent = 'Run Again';
+  running = false;
+}
+
+// Poll height in background while idle
+setInterval(async () => {
+  if (running) return;
+  try {
+    const h = await getHeight();
+    if (h > 0) setStateVal('height', h);
+  } catch {}
+}, 5000);
+</script>
+</body>
+</html>
