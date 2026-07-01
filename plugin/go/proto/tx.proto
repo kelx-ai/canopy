@@ -54,3 +54,41 @@ message Signature {
   // signature: the bytes of the signature output from a private key which may be verified with the message and public
   bytes signature = 2;
 }
+
+// MsgPublishThread registers a piece of content onchain
+message MsgPublishThread {
+  bytes creator = 1;
+  bytes content_hash = 2; // @gotags: json:"contentHash"
+  string title = 3;
+}
+
+// MsgTipCreator sends uCNPY to a creator
+message MsgTipCreator {
+  bytes tipper = 1;
+  bytes creator = 2;
+  uint64 amount = 3;
+}
+
+// MsgClaimTips withdraws accumulated tips to the creator's wallet
+message MsgClaimTips {
+  bytes creator = 1;
+}
+
+// MsgSetSupporterThreshold sets the cumulative tip threshold for supporter status
+message MsgSetSupporterThreshold {
+  bytes creator = 1;
+  uint64 threshold_ucnpy = 2; // @gotags: json:"thresholdUcnpy"
+}
+
+// MessageReward and MessageFaucet are retained for tutorial test compatibility.
+message MessageReward {
+  bytes admin_address = 1; // @gotags: json:"adminAddress"
+  bytes recipient_address = 2; // @gotags: json:"recipientAddress"
+  uint64 amount = 3;
+}
+
+message MessageFaucet {
+  bytes signer_address = 1; // @gotags: json:"signerAddress"
+  bytes recipient_address = 2; // @gotags: json:"recipientAddress"
+  uint64 amount = 3;
+}

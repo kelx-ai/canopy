@@ -1,10 +1,12 @@
 module github.com/canopy-network/go-plugin/tutorial
 
-go 1.25
+go 1.24.0
+
+toolchain go1.24.3
 
 require (
-	github.com/drand/kyber v1.3.2
-	github.com/drand/kyber-bls12381 v0.3.4
+	github.com/drand/kyber v1.3.0
+	github.com/drand/kyber-bls12381 v0.3.1
 	google.golang.org/protobuf v1.36.6
 )
 
