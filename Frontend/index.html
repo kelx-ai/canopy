@@ -942,6 +942,131 @@ async function runDemo() {
   ['fund','publish','threshold','tip','claim'].forEach(id => {
     setCard(id, null); setDot(id, null); setStatus(id, 'Waiting'); setHash(id, '');
   });
+  for (let i = 0; i < 5; i++) setNode(i, null);
+  document.getElementById('fill-0').style.height = '0%';
+  document.getElementById('fill-1').style.height = '0%';
+  document.getElementById('fill-2').style.height = '0%';
+  document.getElementById('fill-3').style.height = '0%';
+  ['height','creator','tipper','supporter'].forEach(id => {
+    document.getElementById('sv-' + id).textContent = '—';
+    document.getElementById('sc-' + id).classList.remove('lit');
+  });
+
+  // step tracking
+  const stepOrder = ['fund','publish','threshold','tip','claim'];
+  let currentStep = -1;
+
+  function activateStep(name) {
+    const idx = stepOrder.indexOf(name);
+    if (idx <= currentStep) return;
+    // complete previous
+    if (currentStep >= 0) {
+      const prev = stepOrder[currentStep];
+      setCard(prev, 'done'); setDot(prev, 'ok');
+      setNode(currentStep, 'done');
+      if (currentStep < 4) {
+        document.getElementById('fill-' + currentStep).style.height = '100%';
+        setNode(currentStep + 1, 'active');
+      }
+    } else {
+      setNode(0, 'done');
+      setNode(1, 'active');
+    }
+    currentStep = idx;
+    setCard(name, 'active'); setDot(name, 'spinning'); setStatus(name, 'In progress…');
+  }
+
+  const es = new EventSource('/run');
+
+  es.addEventListener('start', e => {
+    const d = JSON.parse(e.data);
+    log(d.msg, 'info');
+    setNode(0, 'active');
+  });
+
+  es.addEventListener('line', e => {
+    const d = JSON.parse(e.data);
+    log(d.msg, d.level);
+    if (d.step) activateStep(d.step);
+
+    // parse balance updates from log lines
+    const creatorMatch = d.msg.match(/Creator (?:balance after claim|funded)[^\d]*(\d+)/i);
+    if (creatorMatch) setStateVal('creator', parseInt(creatorMatch[1]).toLocaleString());
+
+    const tipperMatch = d.msg.match(/Tipper balance after tip[^\d]*(\d+)/i);
+    if (tipperMatch) setStateVal('tipper', parseInt(tipperMatch[1]).toLocaleString());
+
+    const heightMatch = d.msg.match(/height[^\d]*(\d+)/i);
+    if (heightMatch) setStateVal('height', heightMatch[1]);
+
+    if (d.msg.toLowerCase().includes('supporter status granted')) {
+      setStateVal('supporter', '✓ Granted');
+    }
+
+    // update status text on cards
+    if (d.step && d.level === 'success') {
+      setStatus(d.step, d.msg.replace(/.*lore_test\.go:\d+:\s*/, '').trim());
+    }
+  });
+
+  es.addEventListener('done', e => {
+    es.close();
+    const d = JSON.parse(e.data);
+
+    // complete last step
+    if (currentStep >= 0) {
+      const last = stepOrder[currentStep];
+      if (d.success) {
+        setCard(last, 'done'); setDot(last, 'ok');
+        setNode(currentStep, 'done');
+        if (currentStep < 4) document.getElementById('fill-' + currentStep).style.height = '100%';
+      } else {
+        setCard(last, 'error'); setDot(last, 'fail');
+        setNode(currentStep, 'error');
+      }
+    }
+
+    const banner = document.getElementById('resultBanner');
+    banner.className = 'result-banner ' + (d.success ? 'pass' : 'fail');
+    document.getElementById('resultIcon').textContent = d.success ? '✓' : '✗';
+    document.getElementById('resultTitle').textContent = d.success
+      ? 'All transactions confirmed onchain'
+      : 'Demo encountered an error';
+    document.getElementById('resultSub').textContent = d.msg;
+    void banner.offsetWidth;
+    banner.classList.add('visible');
+
+    btn.disabled = false;
+    label.textContent = 'Run Again';
+    running = false;
+  });
+
+  es.onerror = () => {
+    es.close();
+    log('Connection to proxy lost — is proxy.py running?', 'error');
+    btn.disabled = false;
+    label.textContent = 'Run Again';
+    running = false;
+  };
+
+  return; // everything below replaced by SSE
+}
+
+async function runDemo_UNUSED() {
+  if (running) return;
+  running = true;
+
+  const btn = document.getElementById('runBtn');
+  const label = document.getElementById('runBtnLabel');
+  btn.disabled = true;
+  label.textContent = 'Running…';
+
+  // reset UI
+  document.getElementById('logPanel').innerHTML = '';
+  document.getElementById('resultBanner').className = 'result-banner';
+  ['fund','publish','threshold','tip','claim'].forEach(id => {
+    setCard(id, null); setDot(id, null); setStatus(id, 'Waiting'); setHash(id, '');
+  });
   for (let i = 0; i < 5; i++) { setNode(i, null); setFill(i > 0 ? i-1 : 0, 0); }
   ['height','creator','tipper','supporter'].forEach(id => {
     document.getElementById('sv-' + id).textContent = '—';
